@@ -1,0 +1,303 @@
+<div class="page-wrapper">
+  <aside class="sidebar">
+    <h2>Reception</h2>
+
+    <a routerLink="/receptionist">Dashboard</a>
+    <a routerLink="/receptionist/patients" class="active">Patient Management</a>
+    <a routerLink="/receptionist/appointments">Appointments</a>
+    <a href="javascript:void(0)">Billing</a>
+  </aside>
+
+  <main class="content">
+    <div class="header-row">
+      <div>
+        <h1>Patient Management</h1>
+        <p>Search, add, update, manage appointments, and view billing.</p>
+      </div>
+      <button class="primary-btn" (click)="loadPatients()">Refresh</button>
+    </div>
+
+    <section class="card">
+      <h3>Search Patients</h3>
+      <div class="search-row">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Search by name, MMR No, or phone"
+          (input)="searchPatients()"
+        />
+      </div>
+    </section>
+
+    <div class="grid-layout">
+      <section class="card">
+        <h3>Get Patient By ID</h3>
+        <div class="search-row">
+          <input type="number" [(ngModel)]="patientId" placeholder="Enter Patient ID">
+          <button class="primary-btn" (click)="getPatientById()">Search</button>
+        </div>
+
+        <div *ngIf="selectedPatient" class="details-card">
+          <p><strong>ID:</strong> {{ selectedPatient.patientId }}</p>
+          <p><strong>MMR No:</strong> {{ selectedPatient.mmrno }}</p>
+          <p><strong>Name:</strong> {{ selectedPatient.name }}</p>
+          <p><strong>Phone:</strong> {{ selectedPatient.phone }}</p>
+          <p><strong>Gender:</strong> {{ selectedPatient.gender }}</p>
+          <p><strong>Status:</strong> {{ selectedPatient.status }}</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="form-title-row">
+          <h3>{{ editMode ? 'Update Patient' : 'Add Patient' }}</h3>
+          <span class="mode-badge" [class.edit]="editMode">
+            {{ editMode ? 'Edit Mode' : 'New Entry' }}
+          </span>
+        </div>
+
+        <div class="form-grid">
+          <input [(ngModel)]="patientForm.mmrNo" placeholder="MMR No" readonly>
+
+          <input
+            [(ngModel)]="patientForm.name"
+            name="name"
+            placeholder="Patient Name"
+            required
+            pattern="^[A-Za-z ]+$"
+            #nameRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.gender"
+            name="gender"
+            placeholder="Gender"
+            required
+            #genderRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.dob"
+            name="dob"
+            type="date"
+            required
+            #dobRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.phone"
+            name="phone"
+            placeholder="Phone"
+            required
+            pattern="^[6-9][0-9]{9}$"
+            maxlength="10"
+            #phoneRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.address"
+            name="address"
+            placeholder="Address"
+            required
+            #addressRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.bloodGroup"
+            name="bloodGroup"
+            placeholder="Blood Group"
+            pattern="^(A|B|AB|O)[+-]$"
+            #bloodGroupRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.email"
+            name="email"
+            placeholder="Email"
+            required
+            email
+            #emailRef="ngModel"
+          >
+
+          <input
+            [(ngModel)]="patientForm.status"
+            name="status"
+            placeholder="Status"
+            required
+            #statusRef="ngModel"
+          >
+        </div>
+
+        <div class="validation-box">
+          <p class="error-text" *ngIf="nameRef.invalid && nameRef.touched">
+            Name should contain only letters and spaces. Numbers and special characters are not allowed.
+          </p>
+
+          <p class="error-text" *ngIf="dobRef.touched && !isValidAge(patientForm.dob)">
+            Age must be between 1 and 120 years.
+          </p>
+
+          <p class="error-text" *ngIf="phoneRef.invalid && phoneRef.touched">
+            Phone number must be 10 digits and start with 6, 7, 8, or 9.
+          </p>
+
+          <p class="error-text" *ngIf="phoneRef.touched && !isValidPhone(patientForm.phone)">
+            Phone number cannot be all zeros or repeating like 0000000000 or 1111111111.
+          </p>
+
+          <p class="error-text" *ngIf="bloodGroupRef.invalid && bloodGroupRef.touched">
+            Blood group must be like A+, B+, AB-, O+.
+          </p>
+
+          <p class="error-text" *ngIf="emailRef.invalid && emailRef.touched">
+            Enter a valid email address.
+          </p>
+        </div>
+
+        <div class="button-row">
+          <button
+            class="success-btn"
+            *ngIf="!editMode"
+            (click)="addPatient()"
+            [disabled]="!isPatientFormValid()"
+          >
+            Add Patient
+          </button>
+
+          <button
+            class="warning-btn"
+            *ngIf="editMode"
+            (click)="updatePatient()"
+            [disabled]="!isPatientFormValid()"
+          >
+            Update Patient
+          </button>
+
+          <button class="secondary-btn" (click)="resetForm()">Clear</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="card table-card">
+      <div class="table-header">
+        <h3>Patient List</h3>
+        <span>Total: {{ patients.length }}</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table *ngIf="patients.length > 0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>MMR No</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Gender</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let p of patients">
+              <td>{{ p.patientId }}</td>
+              <td>{{ p.mmrno }}</td>
+              <td>{{ p.name }}</td>
+              <td>{{ p.phone }}</td>
+              <td>{{ p.gender }}</td>
+              <td>{{ p.status }}</td>
+              <td class="action-cell">
+                <button class="edit-btn" (click)="editPatient(p)">Edit</button>
+                <button class="delete-btn" (click)="deletePatient(p.patientId)">Inactive</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p *ngIf="patients.length === 0" class="empty-text">No patients found.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Appointments</h3>
+
+      <div class="form-grid">
+        <input type="date" [(ngModel)]="selectedDate">
+        <button class="primary-btn" (click)="loadSlots()">Load Slots</button>
+      </div>
+
+      <p *ngIf="slots.length === 0" class="empty-text">No available slots for the selected date.</p>
+
+      <div class="form-grid">
+        <input type="number" [(ngModel)]="patientId" placeholder="Patient ID for Booking">
+
+        <select [(ngModel)]="selectedSlotId">
+          <option [ngValue]="0">Select Slot</option>
+          <option *ngFor="let s of slots" [ngValue]="s.slotId">
+            Slot {{ s.slotId }} - {{ s.startTime }} to {{ s.endTime }} - Doctor {{ s.doctorId }}
+          </option>
+        </select>
+
+        <button class="success-btn" (click)="bookAppointment()">Book Appointment</button>
+      </div>
+
+      <div class="button-row">
+        <button class="primary-btn" (click)="loadAppointmentsByPatient()">View Patient Appointments</button>
+      </div>
+
+      <div class="table-wrapper" *ngIf="bookedAppointments.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Appointment ID</th>
+              <th>Patient ID</th>
+              <th>Doctor ID</th>
+              <th>Slot ID</th>
+              <th>Token Number</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Consultation Bill</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of bookedAppointments">
+              <td>{{ a.appointmentId }}</td>
+              <td>{{ a.patientId }}</td>
+              <td>{{ a.doctorId }}</td>
+              <td>{{ a.slotId }}</td>
+              <td>{{ a.tokenNumber }}</td>
+              <td>{{ a.appointmentDate }}</td>
+              <td>{{ a.status }}</td>
+              <td>{{ a.consultationBill }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p *ngIf="bookedAppointments.length === 0" class="empty-text">No appointments loaded.</p>
+    </section>
+
+    <section class="card">
+      <h3>Billing</h3>
+
+      <div class="form-grid">
+        <input type="number" [(ngModel)]="billAppointmentId" placeholder="Enter Appointment ID">
+        <button class="primary-btn" (click)="loadBill()">Generate/View Bill</button>
+      </div>
+
+      <div *ngIf="billData" class="details-card">
+        <p><strong>Appointment ID:</strong> {{ billData.appointmentId }}</p>
+        <p><strong>Patient ID:</strong> {{ billData.patientId }}</p>
+        <p><strong>Patient Name:</strong> {{ billData.patientName }}</p>
+        <p><strong>MMR No:</strong> {{ billData.mmrNo }}</p>
+        <p><strong>Patient Email:</strong> {{ billData.patientEmail }}</p>
+        <p><strong>Doctor ID:</strong> {{ billData.doctorId }}</p>
+        <p><strong>Doctor Fee:</strong> {{ billData.doctorFee }}</p>
+        <p><strong>Token Number:</strong> {{ billData.tokenNumber }}</p>
+        <p><strong>Appointment Date:</strong> {{ billData.appointmentDate }}</p>
+        <p><strong>Status:</strong> {{ billData.status }}</p>
+      </div>
+
+      <p *ngIf="!billData" class="empty-text">No bill loaded.</p>
+    </section>
+  </main>
+</div>

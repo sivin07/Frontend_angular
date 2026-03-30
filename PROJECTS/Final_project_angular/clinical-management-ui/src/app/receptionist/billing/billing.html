@@ -1,0 +1,49 @@
+<div class="page-wrapper">
+  <aside class="sidebar">
+    <h2>Reception</h2>
+
+    <a routerLink="/receptionist">Dashboard</a>
+    <a routerLink="/receptionist/patients">Patient Management</a>
+    <a routerLink="/receptionist/appointments">Appointments</a>
+    <a routerLink="/receptionist/billing" class="active">Billing</a>
+  </aside>
+
+  <main class="content">
+    <div class="header-row">
+      <div>
+        <h1>Billing</h1>
+        <p>Generate, download, and email consultation bills.</p>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="filter-row">
+        <input type="number" [(ngModel)]="appointmentId" placeholder="Appointment ID">
+        <button class="primary-btn" (click)="loadBill()">Load Bill</button>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="billData">
+      <h3>Consultation Bill</h3>
+
+      <div class="details-card">
+        <p><strong>Appointment ID:</strong> {{ billData.appointmentId }}</p>
+        <p><strong>Patient ID:</strong> {{ billData.patientId }}</p>
+        <p><strong>Patient Name:</strong> {{ billData.patientName }}</p>
+        <p><strong>MMR No:</strong> {{ billData.mmrNo }}</p>
+        <p><strong>Patient Email:</strong> {{ billData.patientEmail }}</p>
+        <p><strong>Doctor ID:</strong> {{ billData.doctorId }}</p>
+        <p><strong>Token Number:</strong> {{ billData.tokenNumber }}</p>
+        <p><strong>Appointment Date:</strong> {{ billData.appointmentDate }}</p>
+        <p><strong>Status:</strong> {{ billData.status }}</p>
+        <p><strong>Consultation Fee:</strong> {{ billData.doctorFee }}</p>
+      </div>
+
+      <div class="filter-row">
+        <input type="email" [(ngModel)]="emailToSend" placeholder="Send to patient email or enter new one">
+        <button class="primary-btn" (click)="sendEmail()">Send Email</button>
+        <button class="secondary-btn" (click)="downloadPdf()">Download PDF</button>
+      </div>
+    </section>
+  </main>
+</div>

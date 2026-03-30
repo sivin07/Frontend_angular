@@ -1,0 +1,70 @@
+<div class="dashboard-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Reception</h2>
+
+    <a
+      routerLink="/receptionist"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Dashboard
+    </a>
+
+    <a
+      routerLink="/receptionist/patients"
+      routerLinkActive="active"
+    >
+      Patient Management
+    </a>
+
+    <a
+      routerLink="/receptionist/appointments"
+      routerLinkActive="active"
+    >
+      Appointments
+    </a>
+
+    <a
+      routerLink="/receptionist/billing"
+      routerLinkActive="active"
+    >
+      Billing
+    </a>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="topbar">
+      <h1>Receptionist Dashboard</h1>
+      <p>Clinic Management System</p>
+    </div>
+
+    <div class="cards">
+      <!-- Patients -->
+      <div class="card">
+        <h3>Patients</h3>
+        <p>Manage patient registration, editing, and deletion.</p>
+        <a routerLink="/receptionist/patients" class="btn">Open</a>
+      </div>
+
+      <!-- Appointments -->
+      <div class="card">
+        <h3>Appointments</h3>
+        <p>Book and manage appointments.</p>
+        <a routerLink="/receptionist/appointments" class="btn">Open</a>
+      </div>
+
+      <div class="card">
+        <h3>Billing</h3>
+        <p>Generate and view bills.</p>
+
+       
+        
+        <a routerLink="/receptionist/billing" class="btn">
+          Open
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
