@@ -23,8 +23,8 @@ export const routes: Routes = [
     data: { role: 'Doctor' }
   },
   { 
-    path: 'dashboard/pharmacist', 
-    component: PharmacistComponent, 
+    path: 'pharmacist', 
+    loadChildren: () => import('./pharmacist/pharmacist.routes').then(m => m.PHARMACIST_ROUTES),
     canActivate: [authGuard, roleGuard],
     data: { role: 'Pharmacist' }
   },

@@ -47,7 +47,7 @@ export class LoginComponent {
         } else if (role === 'doctor') {
           this.router.navigate(['/dashboard/doctor']);
         } else if (role === 'pharmacist') {
-          this.router.navigate(['/dashboard/pharmacist']);
+          this.router.navigate(['/pharmacist/dashboard']);
         } else if (role === 'labtech' || role === 'labtechnician' || role === 'lab technician') {
           this.router.navigate(['/dashboard/labtech']);
         } else {
