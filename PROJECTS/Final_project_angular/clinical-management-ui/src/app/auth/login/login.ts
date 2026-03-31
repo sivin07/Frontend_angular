@@ -43,7 +43,7 @@ export class LoginComponent {
         const role = response.Role.toLowerCase();
         
         if (role === 'receptionist') {
-          this.router.navigate(['/dashboard/reception']);
+          this.router.navigate(['/receptionist']);
         } else if (role === 'doctor') {
           this.router.navigate(['/dashboard/doctor']);
         } else if (role === 'pharmacist') {
