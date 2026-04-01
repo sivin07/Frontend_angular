@@ -1,0 +1,244 @@
+<div class="container-fluid py-4 animate-fade-in" *ngIf="!isLoading && consultationDetails">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-1 text-primary-dark">Consultation Room</h1>
+      <p class="text-secondary mb-0">Treating: <span class="fw-bold">{{ consultationDetails.patientName }}</span> ({{ consultationDetails.age }} years old, {{ consultationDetails.gender }})</p>
+    </div>
+    <a routerLink="/doctor/dashboard" class="btn btn-secondary">
+      <i class="material-icons">arrow_back</i> Dashboard
+    </a>
+  </div>
+
+  <div class="row">
+    <!-- Left Column: Patient Summary -->
+    <div class="col-lg-4 mb-4">
+      <div class="glass-card h-100">
+        <h5 class="mb-3 border-bottom pb-2">Patient Details</h5>
+        <div class="mb-2"><strong>Blood Group:</strong> {{ consultationDetails.bloodGroup || 'N/A' }}</div>
+        <div class="mb-2"><strong>Contact:</strong> {{ consultationDetails.contactNumber }}</div>
+        <div class="mb-2"><strong>Reason for Visit:</strong> {{ consultationDetails.reasonForVisit || 'Not Disclosed' }}</div>
+        <hr>
+        <div class="mt-4">
+          <ul class="nav nav-pills flex-column gap-2">
+            <li class="nav-item">
+              <a class="nav-link" [class.active]="activeTab === 'consultation'" (click)="switchTab('consultation')" role="button">
+                Current Consultation
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" [class.active]="activeTab === 'history'" (click)="switchTab('history')" role="button">
+                Patient History <span class="badge bg-secondary ms-2">{{ patientHistory.length }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Content Area -->
+    <div class="col-lg-8">
+      <!-- Consultation Tab -->
+      <div class="glass-card" *ngIf="activeTab === 'consultation'">
+        
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+        <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+        
+        <!-- Backend Stock Errors -->
+        <div *ngIf="stockErrors.length > 0" class="alert alert-danger px-4">
+           <strong>Insufficient Stock!</strong>
+           <ul class="mb-0 mt-2">
+              <li *ngFor="let err of stockErrors">{{ err }}</li>
+           </ul>
+        </div>
+        
+        <form [formGroup]="consultationForm" (ngSubmit)="saveConsultation()">
+          <h5 class="mb-3 text-primary">Diagnosis & Notes</h5>
+          
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <label class="form-label">Symptoms <span class="text-danger">*</span></label>
+              <textarea class="form-control" formControlName="symptoms" rows="3" placeholder="Describe symptoms..."></textarea>
+            </div>
+            <div class="col-md-6 form-group">
+              <label class="form-label">Diagnosis <span class="text-danger">*</span></label>
+              <textarea class="form-control" formControlName="diagnosis" rows="3" placeholder="Enter diagnosis..."></textarea>
+            </div>
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label">Doctor Notes (Internal)</label>
+            <textarea class="form-control" formControlName="doctorNotes" rows="2" placeholder="Any private notes..."></textarea>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+             <h5 class="text-primary mb-0">Prescribe Medicines</h5>
+             <button type="button" class="btn btn-sm btn-secondary" (click)="addMedicine()">
+               <i class="material-icons text-success" style="font-size: 16px;">add_circle</i> Add Medicine
+             </button>
+          </div>
+          
+          <div formArrayName="medicines">
+            <div *ngFor="let med of medicines.controls; let i=index" [formGroupName]="i" class="p-3 bg-light rounded border mb-3 position-relative">
+               <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle p-1" style="line-height:1" (click)="removeMedicine(i)">
+                   <i class="material-icons" style="font-size: 14px;">close</i>
+               </button>
+               
+               <div class="row g-3 align-items-end">
+                   <div class="col-md-5">
+                       <label class="form-label small text-muted">Select Medicine</label>
+                       <select class="form-control" formControlName="medicineId">
+                           <option value="">-- Choose --</option>
+                           <option *ngFor="let aMed of availableMedicines" [value]="aMed.medicineId">
+                               {{ aMed.medicineName }} ({{ aMed.dosageForm }}) - Stock: {{ aMed.availableStock }}
+                           </option>
+                       </select>
+                   </div>
+                   <div class="col-md-3">
+                       <label class="form-label small text-muted">Freq / day</label>
+                       <input type="number" class="form-control" formControlName="frequency" min="1">
+                   </div>
+                   <div class="col-md-2">
+                       <label class="form-label small text-muted">Days</label>
+                       <input type="number" class="form-control" formControlName="duration" min="1">
+                   </div>
+                   <div class="col-md-2">
+                       <label class="form-label small text-muted">Total Qty</label>
+                       <input type="number" class="form-control bg-secondary text-white border-0" 
+                              [value]="(med.get('frequency')?.value || 0) * (med.get('duration')?.value || 0)" disabled>
+                   </div>
+               </div>
+               
+               <!-- Realtime Stock Validation Warning -->
+               <div *ngIf="getMedicineStockError(i)" class="text-danger mt-2 small fw-bold d-flex align-items-center">
+                   <i class="material-icons me-1" style="font-size: 16px;">warning</i> 
+                   {{ getMedicineStockError(i) }}
+               </div>
+            </div>
+            
+            <p *ngIf="medicines.length === 0" class="text-muted small">No medicines added.</p>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+             <h5 class="text-primary mb-0">Request Lab Tests</h5>
+             <button type="button" class="btn btn-sm btn-secondary" (click)="addLabTest()">
+               <i class="material-icons text-info" style="font-size: 16px;">biotech</i> Add Lab Test
+             </button>
+          </div>
+          
+          <div formArrayName="labTests">
+            <div *ngFor="let lab of labTests.controls; let i=index" [formGroupName]="i" class="row g-3 mb-3 align-items-center">
+                <div class="col-md-5">
+                   <select class="form-control" formControlName="labTestId">
+                       <option value="">-- Select Lab Test --</option>
+                       <option *ngFor="let aLab of availableLabTests" [value]="aLab.labTestId">{{ aLab.testName }} (${{ aLab.price }})</option>
+                   </select>
+                </div>
+                <div class="col-md-6">
+                   <input type="text" class="form-control" formControlName="specialInstructions" placeholder="Special Intructions (optional)">
+                </div>
+                <div class="col-md-1 text-end">
+                   <button type="button" class="btn btn-sm btn-danger p-2" (click)="removeLabTest(i)">
+                       <i class="material-icons" style="font-size: 16px;">delete</i>
+                   </button>
+                </div>
+            </div>
+            <p *ngIf="labTests.length === 0" class="text-muted small">No lab tests requested.</p>
+          </div>
+
+          <div class="mt-5 text-end">
+             <button type="submit" class="btn btn-primary btn-lg" [disabled]="consultationForm.invalid || isSaving">
+                 <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                 Save Consultation
+             </button>
+             <div *ngIf="consultationForm.invalid" class="text-danger mt-2 small">
+                Please fill all required fields properly and resolve any stock errors.
+             </div>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Patient History Tab -->
+      <div class="glass-card" *ngIf="activeTab === 'history'">
+        <h5 class="mb-4 text-primary">Patient Medical History</h5>
+        
+        <div *ngIf="patientHistory.length === 0" class="text-center py-5 text-muted">
+           <i class="material-icons mb-2 opacity-50" style="font-size: 48px;">history</i>
+           <h6>No Previous History Found</h6>
+        </div>
+
+        <div class="accordion" id="historyAccordion">
+           <div class="accordion-item mb-3 bg-transparent border-0" *ngFor="let hist of patientHistory; let i = index">
+              <h2 class="accordion-header">
+                 <button class="accordion-button rounded" [class.collapsed]="i !== 0" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + i">
+                    <strong>{{ hist.consultationDate | date:'mediumDate' }}</strong> 
+                    <span class="mx-2 text-muted">| Dr. {{ hist.doctorName }}</span>
+                 </button>
+              </h2>
+              <div [id]="'collapse' + i" class="accordion-collapse collapse" [class.show]="i === 0" data-bs-parent="#historyAccordion">
+                 <div class="accordion-body bg-white rounded-bottom border shadow-sm mt-1 p-4">
+                    <div class="row mb-3">
+                       <div class="col-md-6">
+                           <h6 class="text-secondary small text-uppercase">Symptoms</h6>
+                           <p>{{ hist.symptoms }}</p>
+                       </div>
+                       <div class="col-md-6">
+                           <h6 class="text-secondary small text-uppercase">Diagnosis</h6>
+                           <p>{{ hist.diagnosis }}</p>
+                       </div>
+                    </div>
+                    
+                    <h6 class="text-secondary small text-uppercase mt-4" *ngIf="hist.prescriptions.length > 0">Prescriptions</h6>
+                    <div class="table-responsive mb-3" *ngIf="hist.prescriptions.length > 0">
+                       <table class="table table-sm table-bordered">
+                          <thead class="bg-light">
+                             <tr>
+                                <th>Medicine</th>
+                                <th>Form</th>
+                                <th>Freq</th>
+                                <th>Days</th>
+                                <th>Qty</th>
+                             </tr>
+                          </thead>
+                          <tbody>
+                             <tr *ngFor="let rx of hist.prescriptions">
+                                <td>{{ rx.medicineName }}</td>
+                                <td>{{ rx.dosageForm }}</td>
+                                <td>{{ rx.frequency }}/day</td>
+                                <td>{{ rx.duration }} days</td>
+                                <td>{{ rx.quantity }}</td>
+                             </tr>
+                          </tbody>
+                       </table>
+                    </div>
+                    
+                    <h6 class="text-secondary small text-uppercase mt-4" *ngIf="hist.labRequests.length > 0">Lab Requests</h6>
+                    <ul class="list-group list-group-flush mb-2" *ngIf="hist.labRequests.length > 0">
+                       <li class="list-group-item d-flex justify-content-between px-0" *ngFor="let l of hist.labRequests">
+                          <span>
+                             <strong>{{ l.testName }}</strong>
+                             <div class="small text-muted" *ngIf="l.specialInstructions">{{ l.specialInstructions }}</div>
+                          </span>
+                          <span class="badge" 
+                               [ngClass]="{'bg-warning text-dark': l.status === 'Pending', 'bg-success': l.status === 'Completed'}">
+                               {{ l.status }}
+                          </span>
+                       </li>
+                    </ul>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="d-flex justify-content-center align-items-center vh-100 text-primary">
+   <div class="spinner-border" role="status"></div>
+</div>

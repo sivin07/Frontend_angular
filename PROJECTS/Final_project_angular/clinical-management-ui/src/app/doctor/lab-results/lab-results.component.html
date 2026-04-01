@@ -1,0 +1,139 @@
+<div class="container-fluid py-4 animate-fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-1 text-primary-dark">Lab Results</h1>
+      <p class="text-secondary mb-0">Review pending and completed lab tests for your patients.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- List Area -->
+    <div [ngClass]="selectedDetail ? 'col-lg-7' : 'col-lg-12'">
+      <div class="glass-card mb-4" style="min-height: 400px;">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+          <div class="form-group mb-0" style="max-width: 250px;">
+            <label class="form-label mb-1">Select Date</label>
+            <div class="d-flex gap-2">
+              <input type="date" class="form-control" [(ngModel)]="selectedDate">
+              <button class="btn btn-primary px-3" (click)="fetchResults()" [disabled]="isLoading">
+                <i class="material-icons" style="font-size: 18px;">search</i>
+              </button>
+            </div>
+          </div>
+          <span class="badge bg-primary px-3 py-2 text-white">
+            {{ results.length }} Results
+          </span>
+        </div>
+
+        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+        <div *ngIf="isLoading" class="d-flex justify-content-center py-5 text-primary">
+          <div class="spinner-border" role="status"></div>
+        </div>
+
+        <div class="table-responsive table-container" *ngIf="!isLoading && results.length > 0">
+          <table class="table modern-table table-hover align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th>Req. ID</th>
+                <th>Patient</th>
+                <th>Test Name</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let result of results" 
+                  [class.table-active]="selectedDetail?.labRequestId === result.labRequestId">
+                <td class="text-primary fw-bold">#{{ result.labRequestId }}</td>
+                <td>{{ result.patientName }}</td>
+                <td>{{ result.testName }}</td>
+                <td>
+                  <span class="badge" 
+                        [ngClass]="{
+                          'bg-warning text-dark': result.status === 'Pending' || result.status === 'InProgress',
+                          'bg-success': result.status === 'Completed'
+                        }">
+                    {{ result.status }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm" 
+                          [ngClass]="result.status === 'Completed' ? 'btn-primary' : 'btn-secondary'"
+                          [disabled]="result.status !== 'Completed'"
+                          (click)="viewResultDetail(result.labRequestId)">
+                    View Report
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="text-center py-5" *ngIf="!isLoading && results.length === 0 && !errorMessage">
+          <i class="material-icons opacity-50 mb-3" style="font-size: 64px; color: var(--text-muted)">biotech</i>
+          <h5 class="text-secondary">No Lab Results</h5>
+          <p class="text-muted">There are no lab results available for the selected date.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail View Panel (Only visible when a result is selected) -->
+    <div class="col-lg-5" *ngIf="selectedDetail">
+      <div class="glass-card animate-fade-in h-100 position-relative">
+        <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-3 rounded-circle p-1" style="line-height:0" (click)="closeDetail()">
+          <i class="material-icons" style="font-size: 18px;">close</i>
+        </button>
+
+        <h4 class="mb-3 text-primary border-bottom pb-2">Result Details</h4>
+        
+        <div *ngIf="isLoadingDetail" class="text-center py-4">
+           <div class="spinner-border text-primary" role="status"></div>
+        </div>
+
+        <div *ngIf="detailError" class="alert alert-danger">{{ detailError }}</div>
+
+        <div *ngIf="!isLoadingDetail && !detailError" class="mt-4">
+           
+           <div class="mb-4">
+              <h6 class="text-muted text-uppercase small tracking-wide mb-1">Patient</h6>
+              <div class="fs-5 fw-bold">{{ selectedDetail.patientName }}</div>
+           </div>
+           
+           <div class="mb-4">
+              <h6 class="text-muted text-uppercase small tracking-wide mb-1">Test Name</h6>
+              <div class="fs-5">{{ selectedDetail.testName }}</div>
+              <div class="text-muted small mt-1">Requested: {{ selectedDetail.requestedOn | date:'medium' }}</div>
+           </div>
+
+           <div class="card bg-light border-0 mb-4 p-4 shadow-sm" style="border-radius: var(--radius-lg)">
+              <div class="row align-items-center">
+                 <div class="col-md-6 border-end">
+                    <div class="text-muted text-uppercase small mb-1">Result Value</div>
+                    <div class="fs-3 fw-bold text-primary">{{ selectedDetail.resultValue || 'N/A' }}</div>
+                 </div>
+                 <div class="col-md-6 ps-4">
+                    <div class="text-muted text-uppercase small mb-1">Reference Range</div>
+                    <div class="fw-medium">{{ selectedDetail.referenceRange || 'N/A' }}</div>
+                 </div>
+              </div>
+           </div>
+
+           <div class="mb-4" *ngIf="selectedDetail.remarks">
+              <h6 class="text-muted text-uppercase small tracking-wide mb-1">Lab Technologist Remarks</h6>
+              <div class="p-3 bg-white border rounded">
+                 {{ selectedDetail.remarks }}
+              </div>
+           </div>
+
+           <div class="text-end text-muted small border-top pt-3 mt-4">
+              <i class="material-icons align-middle me-1" style="font-size: 14px;">check_circle</i> 
+              Completed on: {{ selectedDetail.completedOn | date:'medium' }}
+           </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
