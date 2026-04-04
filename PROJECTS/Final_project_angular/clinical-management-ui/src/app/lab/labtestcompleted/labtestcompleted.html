@@ -1,0 +1,56 @@
+<div class="container mt-4">
+
+  <h3 class="mb-3">Completed Lab Tests</h3>
+
+  <!-- 🔥 SEARCH BAR -->
+  <input 
+    type="text"
+    class="form-control mb-3"
+    placeholder="Search by patient name..."
+    [(ngModel)]="searchText"
+    (input)="filterReports()"
+  />
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Result No</th>
+        <th>Patient</th>
+        <th>Test</th>
+        <th>Actual Value</th>
+        <th>Remarks</th>
+        <th>Price</th>
+        <th>Result Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let report of filteredReports">
+        <td>RI-{{ report.ResultId }}</td>
+        <td>{{ report.Patient?.Name }}</td>
+        <td>{{ report.Test?.TestName }}</td>
+        <td>{{ report.ActualValue }}</td>
+        <td>{{ report.Remarks }}</td>
+        <td>₹ {{ report.Test?.Price }}</td>
+        <td>{{ report.Date | date:'dd-MM-yyyy' }}</td>
+
+        <td>
+          <button 
+            class="btn btn-success btn-sm"
+            (click)="printReport(report)">
+            Print
+          </button>
+        </td>
+      </tr>
+
+      <!-- 🔥 No data message -->
+      <tr *ngIf="filteredReports.length === 0">
+        <td colspan="8" class="text-center text-muted">
+          No results found
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

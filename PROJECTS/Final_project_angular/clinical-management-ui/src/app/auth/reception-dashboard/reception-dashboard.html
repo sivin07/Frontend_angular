@@ -1,7 +1,8 @@
 <div class="bg-light min-vh-100 font-monospace" style="font-family: 'Inter', sans-serif !important;">
+  
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 py-3">
     <div class="container-fluid">
-      <h2 class="navbar-brand text-dark fs-4 fw-bold m-0">Reception Dashboard</h2>
+      <h2 class="navbar-brand text-danger fs-4 fw-bold m-0">Lab Technician Dashboard</h2>
       <div class="d-flex align-items-center gap-3">
         <span class="text-secondary fw-medium">Welcome, {{ role }}</span>
         <button class="btn btn-outline-danger btn-sm px-3" (click)="logout()">Logout</button>
@@ -11,22 +12,56 @@
 
   <main class="container py-5">
     <div class="row g-4">
+
+      <!-- 🔥 Pending Tests -->
       <div class="col-md-6 col-lg-4">
         <div class="card border-0 shadow-sm h-100">
-          <div class="card-body p-4">
-            <h3 class="card-title h5 text-dark fw-bold border-bottom pb-3 mb-3">Appointments Today</h3>
-            <p class="card-text text-secondary">No new appointments.</p>
+          <div class="card-body p-4 d-flex flex-column">
+            
+            <h3 class="card-title h5 text-dark fw-bold border-bottom pb-3 mb-3">
+              Pending Tests
+            </h3>
+
+            <p class="card-text text-secondary flex-grow-1">
+              Click to view and process pending lab tests.
+            </p>
+
+            <!-- 🔥 BUTTON -->
+            <button 
+              class="btn btn-primary w-100 mt-3"
+              routerLink="/dashboard/labtech/pending">
+              View Pending Tests
+            </button>
+
           </div>
         </div>
       </div>
+
+      <!-- 🔥 Completed Results -->
       <div class="col-md-6 col-lg-4">
         <div class="card border-0 shadow-sm h-100">
-          <div class="card-body p-4">
-            <h3 class="card-title h5 text-dark fw-bold border-bottom pb-3 mb-3">Patient Registration</h3>
-            <button class="btn btn-primary w-100 py-2 fw-medium">Register New Patient</button>
+          <div class="card-body p-4 d-flex flex-column">
+            
+            <h3 class="card-title h5 text-dark fw-bold border-bottom pb-3 mb-3">
+              Completed Results
+            </h3>
+
+            <p class="card-text text-secondary flex-grow-1">
+              Click to view completed lab tests and print reports.
+            </p>
+
+            <!-- 🔥 BUTTON -->
+            <button 
+              class="btn btn-success w-100 mt-3"
+              routerLink="/dashboard/labtech/completed">
+              View Completed Results
+            </button>
+
           </div>
         </div>
       </div>
+
     </div>
   </main>
+
 </div>

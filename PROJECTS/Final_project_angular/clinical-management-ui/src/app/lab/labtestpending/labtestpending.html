@@ -1,0 +1,87 @@
+<div class="container mt-3">
+
+  <h3>Pending Lab Tests</h3>
+
+  <input type="text" class="form-control mt-3" placeholder="Search by patient name..." [(ngModel)]="searchText"
+    (input)="filterTests()" />
+
+  <table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+      <tr>
+        <th>Prescription No</th>
+        <th>Patient</th>
+        <th>Doctor</th>
+        <th>Test</th>
+        <th>Normal Range</th>
+        <th>Price</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let test of pendingTests">
+        <td>PR-{{ test.PrescriptionId }}</td>
+        <td>{{ test.Patient.Name }}</td>
+        <td>{{ test.Doctor.Staff.Name }}</td>
+        <td>{{ test.Test.TestName }}</td>
+        <td>{{ test.Test.NormalRange }}</td>
+        <td>₹ {{ test.Test.Price }}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" (click)="openModal(test)">
+            Add Result
+          </button>
+        </td>
+      </tr>
+      <!-- 🔥 NO DATA MESSAGE -->
+      <tr *ngIf="pendingTests.length === 0">
+        <td colspan="7" class="text-center text-muted">
+          No results found
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- 🔥 Modal -->
+<div class="modal" tabindex="-1" [ngClass]="{'d-block': showModal}" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Add Lab Result</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedTest">
+
+        <p><strong>Test:</strong> {{ selectedTest.Test.TestName }}</p>
+        <p><strong>Normal Range:</strong> {{ selectedTest.Test.NormalRange }}</p>
+        <p><strong>Price:</strong> ₹ {{ selectedTest.Test.Price }}</p>
+
+        <div class="mb-2">
+          <label>Actual Value</label>
+          <input type="number" class="form-control" [(ngModel)]="labResult.ActualValue">
+        </div>
+
+        <div class="mb-2">
+          <label>Remarks</label>
+          <input type="text" class="form-control" [(ngModel)]="labResult.Remarks">
+        </div>
+
+        <!-- <div class="mb-2">
+          <label>Doctor Review</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="labResult.DoctorReview">
+        </div> -->
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button class="btn btn-success" (click)="submitResult()">Save Result</button>
+      </div>
+
+    </div>
+  </div>
+</div>

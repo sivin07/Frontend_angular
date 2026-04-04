@@ -6,6 +6,8 @@ import { PharmacistComponent } from './auth/pharmacist-dashboard/pharmacist-dash
 import { LabtechComponent } from './auth/labtech-dashboard/labtech-dashboard';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
+import { Labtestpending } from './lab/labtestpending/labtestpending';
+import { Labtestcompleted } from './lab/labtestcompleted/labtestcompleted';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -32,7 +34,13 @@ export const routes: Routes = [
     path: 'dashboard/labtech', 
     component: LabtechComponent, 
     canActivate: [authGuard, roleGuard],
-    data: { role: 'LabTechnician' }
+    data: { role: 'LabTechnician' },
+
+    // 🔥 CHILD ROUTES
+    children: [
+      { path: 'pending', component: Labtestpending },
+      { path: 'reports', component: Labtestcompleted }
+    ]
   },
   { path: '**', redirectTo: 'login' }
 ];
