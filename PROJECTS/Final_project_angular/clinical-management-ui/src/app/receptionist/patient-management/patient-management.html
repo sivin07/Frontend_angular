@@ -1,11 +1,44 @@
+<!-- Toast Messages -->
+<div class="toast success" *ngIf="successMessage">
+  {{ successMessage }}
+</div>
+
+<div class="toast error" *ngIf="errorMessage">
+  {{ errorMessage }}
+</div>
+
 <div class="page-wrapper">
   <aside class="sidebar">
     <h2>Reception</h2>
 
-    <a routerLink="/receptionist">Dashboard</a>
-    <a routerLink="/receptionist/patients" class="active">Patient Management</a>
-    <a routerLink="/receptionist/appointments">Appointments</a>
-    <a href="javascript:void(0)">Billing</a>
+    <a
+      routerLink="/receptionist"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Dashboard
+    </a>
+
+    <a
+      routerLink="/receptionist/patients"
+      routerLinkActive="active"
+    >
+      Patient Management
+    </a>
+
+    <a
+      routerLink="/receptionist/appointments"
+      routerLinkActive="active"
+    >
+      Appointments
+    </a>
+
+    <a
+      routerLink="/receptionist/billing"
+      routerLinkActive="active"
+    >
+      Billing
+    </a>
   </aside>
 
   <main class="content">
@@ -14,7 +47,7 @@
         <h1>Patient Management</h1>
         <p>Search, add, update, manage appointments, and view billing.</p>
       </div>
-      <button class="primary-btn" (click)="loadPatients()">Refresh</button>
+      <button class="primary-btn" type="button" (click)="loadPatients()">Refresh</button>
     </div>
 
     <section class="card">
@@ -25,6 +58,8 @@
           [(ngModel)]="searchTerm"
           placeholder="Search by name, MMR No, or phone"
           (input)="searchPatients()"
+          (keypress)="preventSpecialCharacters($event)"
+          (paste)="blockPasteSpecialCharacters($event)"
         />
       </div>
     </section>
@@ -33,16 +68,27 @@
       <section class="card">
         <h3>Get Patient By ID</h3>
         <div class="search-row">
-          <input type="number" [(ngModel)]="patientId" placeholder="Enter Patient ID">
-          <button class="primary-btn" (click)="getPatientById()">Search</button>
+          <input
+            type="text"
+            [(ngModel)]="patientId"
+            placeholder="Enter Patient ID"
+            maxlength="10"
+            (keypress)="allowOnlyNumbers($event)"
+            (paste)="blockPasteNonNumeric($event)"
+          />
+          <button class="primary-btn" type="button" (click)="getPatientById()">Search</button>
         </div>
 
         <div *ngIf="selectedPatient" class="details-card">
           <p><strong>ID:</strong> {{ selectedPatient.patientId }}</p>
           <p><strong>MMR No:</strong> {{ selectedPatient.mmrno }}</p>
           <p><strong>Name:</strong> {{ selectedPatient.name }}</p>
-          <p><strong>Phone:</strong> {{ selectedPatient.phone }}</p>
           <p><strong>Gender:</strong> {{ selectedPatient.gender }}</p>
+          <p><strong>DOB:</strong> {{ selectedPatient.dob | date:'dd-MM-yyyy' }}</p>
+          <p><strong>Phone:</strong> {{ selectedPatient.phone }}</p>
+          <p><strong>Address:</strong> {{ selectedPatient.address }}</p>
+          <p><strong>Blood Group:</strong> {{ selectedPatient.bloodGroup }}</p>
+          <p><strong>Email:</strong> {{ selectedPatient.email }}</p>
           <p><strong>Status:</strong> {{ selectedPatient.status }}</p>
         </div>
       </section>
@@ -56,99 +102,79 @@
         </div>
 
         <div class="form-grid">
-          <input [(ngModel)]="patientForm.mmrNo" placeholder="MMR No" readonly>
+          <input [(ngModel)]="patientForm.mmrNo" placeholder="MMR No" readonly />
 
           <input
             [(ngModel)]="patientForm.name"
-            name="name"
             placeholder="Patient Name"
-            required
-            pattern="^[A-Za-z ]+$"
-            #nameRef="ngModel"
-          >
+            maxlength="100"
+            (keypress)="allowOnlyLetters($event)"
+            (paste)="blockPasteNonLetters($event)"
+          />
 
-          <input
-            [(ngModel)]="patientForm.gender"
-            name="gender"
-            placeholder="Gender"
-            required
-            #genderRef="ngModel"
-          >
+          <select [(ngModel)]="patientForm.gender">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
 
-          <input
-            [(ngModel)]="patientForm.dob"
-            name="dob"
-            type="date"
-            required
-            #dobRef="ngModel"
-          >
+          <input [(ngModel)]="patientForm.dob" type="date" />
 
           <input
             [(ngModel)]="patientForm.phone"
-            name="phone"
+            type="text"
             placeholder="Phone"
-            required
-            pattern="^[6-9][0-9]{9}$"
             maxlength="10"
-            #phoneRef="ngModel"
-          >
+            (keypress)="allowOnlyNumbers($event)"
+            (paste)="blockPasteNonNumeric($event)"
+          />
 
           <input
             [(ngModel)]="patientForm.address"
-            name="address"
             placeholder="Address"
-            required
-            #addressRef="ngModel"
-          >
+            maxlength="100"
+          />
 
-          <input
-            [(ngModel)]="patientForm.bloodGroup"
-            name="bloodGroup"
-            placeholder="Blood Group"
-            pattern="^(A|B|AB|O)[+-]$"
-            #bloodGroupRef="ngModel"
-          >
+          <select [(ngModel)]="patientForm.bloodGroup">
+            <option value="">Select Blood Group</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
 
           <input
             [(ngModel)]="patientForm.email"
-            name="email"
+            type="email"
             placeholder="Email"
-            required
-            email
-            #emailRef="ngModel"
-          >
+            maxlength="100"
+          />
 
-          <input
-            [(ngModel)]="patientForm.status"
-            name="status"
-            placeholder="Status"
-            required
-            #statusRef="ngModel"
-          >
+          <select [(ngModel)]="patientForm.status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
         </div>
 
         <div class="validation-box">
-          <p class="error-text" *ngIf="nameRef.invalid && nameRef.touched">
-            Name should contain only letters and spaces. Numbers and special characters are not allowed.
+          <p class="error-text" *ngIf="patientForm.name && !isValidName(patientForm.name)">
+            Name should contain only letters and spaces.
           </p>
 
-          <p class="error-text" *ngIf="dobRef.touched && !isValidAge(patientForm.dob)">
+          <p class="error-text" *ngIf="patientForm.dob && !isValidAge(patientForm.dob)">
             Age must be between 1 and 120 years.
           </p>
 
-          <p class="error-text" *ngIf="phoneRef.invalid && phoneRef.touched">
-            Phone number must be 10 digits and start with 6, 7, 8, or 9.
+          <p class="error-text" *ngIf="patientForm.phone && !isValidPhone(patientForm.phone)">
+            Phone must be 10 digits, start with 6–9, and not contain repeating digits.
           </p>
 
-          <p class="error-text" *ngIf="phoneRef.touched && !isValidPhone(patientForm.phone)">
-            Phone number cannot be all zeros or repeating like 0000000000 or 1111111111.
-          </p>
-
-          <p class="error-text" *ngIf="bloodGroupRef.invalid && bloodGroupRef.touched">
-            Blood group must be like A+, B+, AB-, O+.
-          </p>
-
-          <p class="error-text" *ngIf="emailRef.invalid && emailRef.touched">
+          <p class="error-text" *ngIf="patientForm.email && !isValidEmail(patientForm.email)">
             Enter a valid email address.
           </p>
         </div>
@@ -156,6 +182,7 @@
         <div class="button-row">
           <button
             class="success-btn"
+            type="button"
             *ngIf="!editMode"
             (click)="addPatient()"
             [disabled]="!isPatientFormValid()"
@@ -165,6 +192,7 @@
 
           <button
             class="warning-btn"
+            type="button"
             *ngIf="editMode"
             (click)="updatePatient()"
             [disabled]="!isPatientFormValid()"
@@ -172,7 +200,7 @@
             Update Patient
           </button>
 
-          <button class="secondary-btn" (click)="resetForm()">Clear</button>
+          <button class="secondary-btn" type="button" (click)="resetForm()">Clear</button>
         </div>
       </section>
     </div>
@@ -190,8 +218,12 @@
               <th>ID</th>
               <th>MMR No</th>
               <th>Name</th>
-              <th>Phone</th>
               <th>Gender</th>
+              <th>DOB</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Blood Group</th>
+              <th>Email</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -202,12 +234,16 @@
               <td>{{ p.patientId }}</td>
               <td>{{ p.mmrno }}</td>
               <td>{{ p.name }}</td>
-              <td>{{ p.phone }}</td>
               <td>{{ p.gender }}</td>
+              <td>{{ p.dob | date:'dd-MM-yyyy' }}</td>
+              <td>{{ p.phone }}</td>
+              <td>{{ p.address }}</td>
+              <td>{{ p.bloodGroup }}</td>
+              <td>{{ p.email }}</td>
               <td>{{ p.status }}</td>
               <td class="action-cell">
-                <button class="edit-btn" (click)="editPatient(p)">Edit</button>
-                <button class="delete-btn" (click)="deletePatient(p.patientId)">Inactive</button>
+                <button class="edit-btn" type="button" (click)="editPatient(p)">Edit</button>
+                <button class="delete-btn" type="button" (click)="deletePatient(p.patientId)">Inactive</button>
               </td>
             </tr>
           </tbody>
@@ -221,14 +257,21 @@
       <h3>Appointments</h3>
 
       <div class="form-grid">
-        <input type="date" [(ngModel)]="selectedDate">
-        <button class="primary-btn" (click)="loadSlots()">Load Slots</button>
+        <input type="date" [(ngModel)]="selectedDate" />
+        <button class="primary-btn" type="button" (click)="loadSlots()">Load Slots</button>
       </div>
 
       <p *ngIf="slots.length === 0" class="empty-text">No available slots for the selected date.</p>
 
       <div class="form-grid">
-        <input type="number" [(ngModel)]="patientId" placeholder="Patient ID for Booking">
+        <input
+          type="text"
+          [(ngModel)]="patientId"
+          placeholder="Patient ID for Booking"
+          maxlength="10"
+          (keypress)="allowOnlyNumbers($event)"
+          (paste)="blockPasteNonNumeric($event)"
+        />
 
         <select [(ngModel)]="selectedSlotId">
           <option [ngValue]="0">Select Slot</option>
@@ -237,11 +280,13 @@
           </option>
         </select>
 
-        <button class="success-btn" (click)="bookAppointment()">Book Appointment</button>
+        <button class="success-btn" type="button" (click)="bookAppointment()">Book Appointment</button>
       </div>
 
       <div class="button-row">
-        <button class="primary-btn" (click)="loadAppointmentsByPatient()">View Patient Appointments</button>
+        <button class="primary-btn" type="button" (click)="loadAppointmentsByPatient()">
+          View Patient Appointments
+        </button>
       </div>
 
       <div class="table-wrapper" *ngIf="bookedAppointments.length > 0">
@@ -272,16 +317,21 @@
           </tbody>
         </table>
       </div>
-
-      <p *ngIf="bookedAppointments.length === 0" class="empty-text">No appointments loaded.</p>
     </section>
 
     <section class="card">
       <h3>Billing</h3>
 
       <div class="form-grid">
-        <input type="number" [(ngModel)]="billAppointmentId" placeholder="Enter Appointment ID">
-        <button class="primary-btn" (click)="loadBill()">Generate/View Bill</button>
+        <input
+          type="text"
+          [(ngModel)]="billAppointmentId"
+          placeholder="Enter Appointment ID"
+          maxlength="10"
+          (keypress)="allowOnlyNumbers($event)"
+          (paste)="blockPasteNonNumeric($event)"
+        />
+        <button class="primary-btn" type="button" (click)="loadBill()">Generate/View Bill</button>
       </div>
 
       <div *ngIf="billData" class="details-card">
@@ -296,8 +346,6 @@
         <p><strong>Appointment Date:</strong> {{ billData.appointmentDate }}</p>
         <p><strong>Status:</strong> {{ billData.status }}</p>
       </div>
-
-      <p *ngIf="!billData" class="empty-text">No bill loaded.</p>
     </section>
   </main>
 </div>

@@ -9,5 +9,4 @@ import { RouterModule } from '@angular/router';
   templateUrl: './receptionist-dashboard.html',
   styleUrl: './receptionist-dashboard.css'
 })
-export class ReceptionistDashboard {
-}
+export class ReceptionistDashboardComponent {}

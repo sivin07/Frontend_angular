@@ -1,7 +1,6 @@
 <div class="page-wrapper">
   <aside class="sidebar">
     <h2>Reception</h2>
-
     <a routerLink="/receptionist">Dashboard</a>
     <a routerLink="/receptionist/patients">Patient Management</a>
     <a routerLink="/receptionist/appointments" class="active">Appointments</a>
@@ -12,68 +11,46 @@
     <div class="header-row">
       <div>
         <h1>Appointments</h1>
-        <p>View, search, and filter patient appointments.</p>
+        <p>Search, filter, and open billing from appointments.</p>
       </div>
-      <button class="primary-btn" (click)="loadTodayAppointments()">Today's Appointments</button>
     </div>
 
     <section class="card">
-      <h3>Search / Filter</h3>
-
       <div class="filter-row">
-        <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          placeholder="Search by Patient Name or MMR No"
-          (input)="searchAppointments()"
-        />
-
-        <input
-          type="date"
-          [(ngModel)]="selectedDate"
-          (change)="searchAppointments()"
-        />
-
+        <input [(ngModel)]="searchTerm" placeholder="Search by patient name / MMR / phone" />
+        <input type="date" [(ngModel)]="selectedDate" />
+        <button class="primary-btn" (click)="searchAppointments()">Search</button>
+        <button class="success-btn" (click)="loadTodayAppointments()">Today</button>
         <button class="secondary-btn" (click)="clearFilters()">Clear</button>
       </div>
     </section>
 
-    <section class="card table-card">
-      <div class="table-header">
-        <h3>Appointment List</h3>
-        <span>Total: {{ appointments.length }}</span>
-      </div>
-
+    <section class="card">
       <div class="table-wrapper">
         <table *ngIf="appointments.length > 0">
           <thead>
             <tr>
               <th>Appointment ID</th>
-              <th>Token No</th>
-              <th>Date</th>
-              <th>MMR No</th>
+              <th>Patient ID</th>
               <th>Patient Name</th>
               <th>Doctor ID</th>
-              <th>Slot ID</th>
+              <th>Token</th>
+              <th>Date</th>
               <th>Status</th>
-              <th>Consultation Bill</th>
               <th>Billing</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr *ngFor="let a of appointments" [class.today-row]="isToday(a.appointmentDate)">
+            <tr *ngFor="let a of appointments">
               <td>{{ a.appointmentId }}</td>
+              <td>{{ a.patientId }}</td>
+              <td>{{ a.patientName || '-' }}</td>
+              <td>{{ a.doctorId }}</td>
               <td>{{ a.tokenNumber }}</td>
               <td>{{ a.appointmentDate }}</td>
-              <td>{{ a.mmrNo }}</td>
-              <td>{{ a.patientName }}</td>
-              <td>{{ a.doctorId }}</td>
-              <td>{{ a.slotId }}</td>
               <td>{{ a.status }}</td>
-              <td>{{ a.consultationBill }}</td>
               <td>
-                <button class="primary-btn" (click)="openBilling(a.appointmentId)">Use for Billing</button>
+                <button class="primary-btn" (click)="openBilling(a.appointmentId)">Open Billing</button>
               </td>
             </tr>
           </tbody>

@@ -1,5 +1,4 @@
-<div class="dashboard-wrapper">
-  <!-- Sidebar -->
+<div class="page-wrapper">
   <aside class="sidebar">
     <h2>Reception</h2>
 
@@ -33,38 +32,38 @@
     </a>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="topbar">
-      <h1>Receptionist Dashboard</h1>
-      <p>Clinic Management System</p>
+  <main class="content">
+    <div class="header-row">
+      <div>
+        <h1>Receptionist Dashboard</h1>
+        <p>Quick access to patient management, appointments, and billing.</p>
+      </div>
     </div>
 
-    <div class="cards">
-      <!-- Patients -->
-      <div class="card">
+    <div class="grid-layout">
+      <section class="card">
         <h3>Patients</h3>
-        <p>Manage patient registration, editing, and deletion.</p>
-        <a routerLink="/receptionist/patients" class="btn">Open</a>
-      </div>
-
-      <!-- Appointments -->
-      <div class="card">
-        <h3>Appointments</h3>
-        <p>Book and manage appointments.</p>
-        <a routerLink="/receptionist/appointments" class="btn">Open</a>
-      </div>
-
-      <div class="card">
-        <h3>Billing</h3>
-        <p>Generate and view bills.</p>
-
-       
-        
-        <a routerLink="/receptionist/billing" class="btn">
+        <p>Register, search, edit, and manage patient records.</p>
+        <button type="button" class="primary-btn" routerLink="/receptionist/patients">
           Open
-        </a>
-      </div>
+        </button>
+      </section>
+
+      <section class="card">
+        <h3>Appointments</h3>
+        <p>View all appointments and search by date or patient.</p>
+        <button type="button" class="primary-btn" routerLink="/receptionist/appointments">
+          Open
+        </button>
+      </section>
+
+      <section class="card">
+        <h3>Billing</h3>
+        <p>Generate consultation bills, download PDF, and email bills.</p>
+        <button type="button" class="primary-btn" routerLink="/receptionist/billing">
+          Open
+        </button>
+      </section>
     </div>
   </main>
 </div>
